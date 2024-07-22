@@ -18,7 +18,7 @@ struct Args {
     #[arg(short, long)]
     file: String,
 
-    /// Number of times to greet
+    /// Address to a TCP server to connect to and send the data
     #[arg(short, long, default_value_t = String::from(""))]
     server: String,
 }

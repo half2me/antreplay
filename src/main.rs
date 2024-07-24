@@ -1,14 +1,14 @@
-use pcap_parser::{PcapNGReader, PcapError, PcapBlockOwned};
+use clap::Parser;
+use flate2::read::GzDecoder;
 use pcap_parser::traits::{PcapNGPacketBlock, PcapReaderIterator};
-use std::fs::File;
-use std::{thread, time};
+use pcap_parser::Block::{EnhancedPacket, InterfaceDescription};
+use pcap_parser::{PcapBlockOwned, PcapError, PcapNGReader};
 use std::ffi::OsStr;
+use std::fs::File;
 use std::io::{Read, Write};
 use std::net::TcpStream;
 use std::path::Path;
-use pcap_parser::Block::{EnhancedPacket, InterfaceDescription};
-use clap::Parser;
-use flate2::read::GzDecoder;
+use std::{thread, time};
 
 /// Replay ANT+ data from a .pcapng file
 #[derive(Parser, Debug)]
@@ -25,7 +25,8 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
-    let file = open_possibly_compressed_file(args.file.as_str()).expect("can't open the specified path");
+    let file =
+        open_possibly_compressed_file(args.file.as_str()).expect("can't open the specified path");
     let mut reader = PcapNGReader::new(65536, file).expect("PcapNGReader");
     let mut stream = if args.server != "" {
         Some(TcpStream::connect(args.server).expect("unable to connect to server"))
@@ -42,7 +43,8 @@ fn main() {
             Ok((offset, block)) => {
                 match block {
                     PcapBlockOwned::NG(InterfaceDescription(d)) => {
-                        if_tsoffset = Some(u64::try_from(d.if_tsoffset).expect("invalid ts offset"));
+                        if_tsoffset =
+                            Some(u64::try_from(d.if_tsoffset).expect("invalid ts offset"));
                         ts_resolution = Some(d.ts_resolution().expect("invalid ts resolution"))
                     }
                     PcapBlockOwned::NG(EnhancedPacket(p)) => {
@@ -73,11 +75,11 @@ fn main() {
                     _ => {}
                 }
                 reader.consume(offset);
-            },
+            }
             Err(PcapError::Eof) => break,
             Err(PcapError::Incomplete(_)) => {
                 reader.refill().unwrap();
-            },
+            }
             Err(e) => panic!("error while reading: {:?}", e),
         }
     }

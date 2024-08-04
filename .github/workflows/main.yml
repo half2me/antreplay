@@ -24,16 +24,9 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
   build:
-    strategy:
-      matrix:
-        target:
-          - aarch64-apple-darwin
-          - aarch64-unknown-linux-gnu
     runs-on: ubuntu-latest
     name: build
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.target }}
       - run: cargo build

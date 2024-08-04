@@ -20,9 +20,10 @@ jobs:
     needs:
       - create-release
     strategy:
+      fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: macos-11
             target: aarch64-apple-darwin
             artifact_name: pcapdump
             asset_name: pcapdump-darwin-aarch64
@@ -35,16 +36,21 @@ jobs:
     name: build and upload release
     steps:
       - uses: actions/checkout@v4
+
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
+
       - name: Install cross compiler
         if: ${{ matrix.cross }}
         run: cargo install cross
+
       - run: cross build --release --target ${{ matrix.target }}
         if: ${{ matrix.cross }}
+
       - run: cargo build --release --target ${{ matrix.target }}
         if: ${{ !matrix.cross }}
+
       - name: Upload
         run: |
           cp ${{ matrix.artifact_name}} ${{ matrix.asset_name}}

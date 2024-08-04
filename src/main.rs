@@ -40,7 +40,9 @@ fn main() {
 
     if let Some(stream) = &mut stream {
         if let Some(hello) = &args.hello_msg {
-            stream.write_all(format!("{}\n", hello).as_ref()).expect("failed to send hello msg")
+            stream
+                .write_all(format!("{}\n", hello).as_ref())
+                .expect("failed to send hello msg")
         }
     }
 

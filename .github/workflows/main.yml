@@ -23,22 +23,34 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
   build:
+    permissions:
+      contents: write
     strategy:
       matrix:
-        target:
-          - aarch64-apple-darwin
-          - aarch64-unknown-linux-gnu
+        include:
+          - target: aarch64-apple-darwin
+            artifact_name: pcapdump
+            asset_name: pcapdump-darwin-aarch64
+          - target: aarch64-unknown-linux-gnu
+            artifact_name: pcapdump
+            asset_name: pcapdump-linux-aarch64
     runs-on: ubuntu-latest
     name: build
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
         with:
-          targets:
+          targets: ${{ matrix.target }}
       - run: cargo build --release
-
-#      - name: Release
-#        uses: softprops/action-gh-release@v2
-#        if: startsWith(github.ref, 'refs/tags/')
-#        with:
-#          files: |
+      - name: Rename for release
+        if: startsWith(github.ref, 'refs/tags/')
+        working-directory: target/release
+        run: |
+          mv ${{ matrix.artifact_name}} ${{ matrix.asset_name}}
+          gh release upload ${{github.event.release.tag_name}} ${{ matrix.asset_name}}
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            target/release/${{ matrix.asset_name }}

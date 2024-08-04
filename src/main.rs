@@ -14,25 +14,35 @@ use std::{thread, time};
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
-    /// Path to the .pcapng file
-    #[arg(short, long)]
+    /// Path to the .pcap or gzip compressed .pcap file
+    #[arg(long)]
     file: String,
 
     /// Address to a TCP server to connect to and send the data
-    #[arg(short, long, default_value_t = String::from(""))]
-    server: String,
+    #[arg(long)]
+    server: Option<String>,
+
+    /// Optional hello message to send to the TCP server before sending ANT+ messages
+    /// a newline character will also be sent after the hello msg
+    #[arg(long)]
+    hello_msg: Option<String>,
 }
 
 fn main() {
     let args = Args::parse();
     let file =
         open_possibly_compressed_file(args.file.as_str()).expect("can't open the specified path");
-    let mut reader = PcapNGReader::new(65536, file).expect("PcapNGReader");
-    let mut stream = if args.server != "" {
-        Some(TcpStream::connect(args.server).expect("unable to connect to server"))
-    } else {
-        None
+    let mut reader = PcapNGReader::new(65536, file).unwrap();
+    let mut stream = match args.server {
+        Some(url) => Some(TcpStream::connect(url).expect("unable to connect to TCP server")),
+        None => None,
     };
+
+    if let Some(stream) = &mut stream {
+        if let Some(hello) = &args.hello_msg {
+            stream.write_all(format!("{}\n", hello).as_ref()).expect("failed to send hello msg")
+        }
+    }
 
     let mut last_timestamp: Option<f64> = None;
     let mut if_tsoffset: Option<u64> = None;

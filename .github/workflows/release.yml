@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: gh release create ${{ github.ref }} --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}
   build-and-upload:
     permissions:
       contents: write
@@ -35,3 +37,5 @@ jobs:
           cp ./${{ matrix.artifact_name}} ./${{ matrix.asset_name}}
           gh release upload ${{ github.ref }}
         working-directory: target/release ${{ matrix.asset_name}}
+        env:
+          GH_TOKEN: ${{ github.token }}

@@ -1,5 +1,8 @@
 name: Release
 
+permissions:
+  contents: write
+
 on:
   push:
     tags:
@@ -14,8 +17,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
   build-and-upload:
-    permissions:
-      contents: write
     strategy:
       matrix:
         include:
@@ -35,8 +36,8 @@ jobs:
       - run: cargo build --release
       - name: Upload
         run: |
-          cp "${{ matrix.artifact_name}}" "${{ matrix.asset_name}}"
+          cp ${{ matrix.artifact_name}} ${{ matrix.asset_name}}
           gh release upload ${{ github.ref }} ${{ matrix.asset_name}}
-        working-directory: target/release ${{ matrix.asset_name}}
+        working-directory: target/release
         env:
           GH_TOKEN: ${{ github.token }}

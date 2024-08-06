@@ -23,17 +23,29 @@ jobs:
       fail-fast: false
       matrix:
         include:
-#          - os: macos-11
-#            target: aarch64-apple-darwin
-#            artifact_name: pcapdump
-#            asset_name: pcapdump-darwin-aarch64
-#            cross: true
-          - target: aarch64-unknown-linux-gnu
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifact_name: pcapdump
+            asset_name: pcapdump-darwin-aarch64
+          - os: macos-13
+            target: x86_64-apple-darwin
+            artifact_name: pcapdump
+            asset_name: pcapdump-darwin-x86_64
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact_name: pcapdump.exe
+            asset_name: pcapdump-windows-x86_64.exe
+          - os: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
             artifact_name: pcapdump
             asset_name: pcapdump-linux-aarch64
             cross: true
-    runs-on: ubuntu-latest
-    name: build and upload release
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact_name: pcapdump
+            asset_name: pcapdump-linux-x86_64
+    runs-on: ${{ matrix.os }}
+    name: release
     steps:
       - uses: actions/checkout@v4
 

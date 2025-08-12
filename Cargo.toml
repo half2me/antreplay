@@ -8,4 +8,4 @@ edition = "2021"
 [dependencies]
 clap = { version = "4.5.43", features = ["derive"] }
 flate2 = "1.1.2"
-pcap-parser = { version="0.16.0", features = ["serialize"] }
+pcap-parser = { version="0.17.0", features = ["serialize"] }
